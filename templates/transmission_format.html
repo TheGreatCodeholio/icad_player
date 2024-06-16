@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Audio Player</title>
+    <style>
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .drawer {
+            background-color: #f9f9f9; /* Light grey background for the drawer */
+        }
+
+        .transcript-drawer {
+            transition: max-height 0.5s ease-out;
+            overflow: hidden;
+            max-height: 0; /* Initially hidden */
+        }
+
+        .transcript-drawer.open {
+            max-height: 500px; /* Adjust as necessary */
+        }
+
+        .playButton {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        .playButton.playing {
+            background-color: #dc3545;
+        }
+
+        .playButton .progressBar {
+            height: 10px;
+            background-color: #007bff;
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        .list-group-item.border {
+            border: 1px solid #8e8e9c;
+            border-radius: 10px;
+        }
+
+        .service-type-badge.fire {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .service-type-badge.law {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .service-type-badge.ems {
+            background-color: white;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .service-type-badge.generic {
+            background-color: #383838;
+            color: white;
+        }
+
+        .transmission-badge.duration {
+            background-color: #604385;
+            color: white;
+        }
+
+        .transmission-badge.tones {
+            background-color: #a82626;
+            color: white;
+        }
+
+        @media (min-width: 992px) {
+            /* Adjust this value if you're using a different breakpoint */
+            .custom-container {
+                max-width: 66.666%; /* 2/3 of the screen width */
+                margin-left: auto; /* Centering */
+                margin-right: auto; /* Centering */
+            }
+        }
+
+    </style>
+    <link href="{{ url_for('static', filename='font_awesome/css/all.css') }}" rel="stylesheet"/>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body>
+<div>Live Audio Player</div>
+<div class="container-fluid custom-container py-5">
+    <div class="row">
+        <div class="col-12 text-center">
+            <table class="table table-borderless table-responsive">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">System</th>
+                    <th scope="col">Talkgroup</th>
+                    <th scope="col">Time</th>
+                </tr>
+                </thead>
+                <tbody id="call_table">
+                <tr class="clickable-row">
+                    <th><i class="fa fa-play"></i></th>
+                    <td>Allied Radio Matrix</td>
+                    <td>Fire Dispatch MPLS FD 1</td>
+                    <td>3/13/2024, 7:56:26 PM</td>
+                </tr>
+                <tr class="drawer" style="display: none;">
+                    <td colspan="4">
+                        <p>Engine 11 to assist EMS with one who's having a diabetic reaction is very dizzy and unable
+                            to stand. 356 Monroe Street Northeast, the MOOC, at 511 Charlie. Engine 11 assists EMS with
+                            one who's having issues with a diabetic reaction at the MOOC, 356 Monroe Street Northeast,
+                            at 511 Charlie, 1856.</p>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Make TR clickable and the drawer expand
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', () => {
+                // Find the next sibling (the drawer) and toggle its display
+                const drawer = row.nextElementSibling;
+                if (drawer.style.display === "none") {
+                    drawer.style.display = "table-row";
+                } else {
+                    drawer.style.display = "none";
+                }
+            });
+        });
+
+        document.querySelectorAll('.play-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                let player_id = btn.id.replace('play_', 'audio_')
+                let audioPlayer = document.getElementById(player_id);
+
+                // Play the audio
+                if (audioPlayer.paused) {
+                    audioPlayer.play();
+                    this.innerHTML = '<i class="fa fa-pause"></i>'; // Change to pause icon
+                } else {
+                    audioPlayer.pause();
+                    this.innerHTML = '<i class="fa fa-play"></i>'; // Change back to play icon
+                }
+
+                // Toggle transcript drawer visibility
+                let transcriptId = btn.id.replace('play_', 'transcript_');
+                let transcript = document.getElementById(transcriptId);
+                if (transcript.hidden) {
+                    transcript.hidden = false;
+                    transcript.classList.add('open'); // Apply the CSS class to show the drawer
+                } else {
+                    transcript.hidden = true;
+                    transcript.classList.remove('open'); // Hide the drawer
+                }
+            });
+        });
+
+        // Pause the audio when it ends and reset play button
+        document.querySelectorAll('audio').forEach(function (audio) {
+            audio.addEventListener('ended', function () {
+                let btnID = audio.id.replace('audio_', 'play_')
+                let button = document.getElementById(btnID);
+                button.innerHTML = '<i class="bi bi-play-fill"></i>';
+                let transcriptId = this.id.replace('audio_', 'transcript_');
+                let transcript = document.getElementById(transcriptId);
+                transcript.hidden = true;
+                transcript.classList.remove('open'); // Hide the drawer
+            });
+        });
+    });
+</script>
+</body>
+</html>

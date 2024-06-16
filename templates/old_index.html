@@ -1,0 +1,701 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Audio Player</title>
+    <style>
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .drawer {
+            background-color: #f9f9f9; /* Light grey background for the drawer */
+        }
+
+        .transcript-drawer {
+            transition: max-height 0.5s ease-out;
+            overflow: hidden;
+            max-height: 0; /* Initially hidden */
+        }
+
+        .transcript-drawer.open {
+            max-height: 500px; /* Adjust as necessary */
+        }
+
+        @media (min-width: 992px) {
+            /* Adjust this value if you're using a different breakpoint */
+            .custom-container {
+                max-width: 66.666%; /* 2/3 of the screen width */
+                margin-left: auto; /* Centering */
+                margin-right: auto; /* Centering */
+            }
+        }
+
+        /* For medium screens (md) and up */
+        @media (min-width: 768px) {
+            .table td, .table th {
+                font-size: 2rem; /* Adjust size as needed */
+            }
+        }
+
+        /* For large screens (lg) and up */
+        @media (min-width: 992px) {
+            .table td, .table th {
+                font-size: 1rem; /* Adjust size as needed */
+            }
+        }
+
+    </style>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script>
+        const socket = io();
+
+        socket.on('connect', function () {
+            console.log('Connected to the server');
+        });
+    </script>
+</head>
+<body>
+<div>Live Audio Player</div>
+<audio id="audioPlayer" class="d-none" controls>
+    <source src="" type="audio/mpeg">
+</audio>
+<div class="container-fluid py-5 custom-container">
+    <div class="row">
+        <div class="col-sm-12 col-lg-8 text-center">
+            <table class="table table-borderless table-responsive">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">System</th>
+                    <th scope="col">Talkgroup</th>
+                    <th scope="col">Time</th>
+                </tr>
+                </thead>
+                <tbody id="call_table">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="audioList" class="list-group">
+        <!-- Audio items will be inserted here -->
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script type="text/javascript">
+
+    let currentAudioId = '1234-1234';
+
+    // Get date from Epoch Timestamp
+    function formatEpochToDate(epochSeconds) {
+        // Create a new Date object using the epoch timestamp multiplied by 1000
+        // because JavaScript expects the timestamp to be in milliseconds
+        const date = new Date(epochSeconds * 1000);
+
+        // Use toLocaleString() with appropriate options to format the date
+        return date.toLocaleString('en-US', {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
+    }
+
+    function playAudio() {
+        const audioPlayer = document.getElementById(`audioPlayer`);
+
+        const transmissionId = audioPlayer.getAttribute('data-transmission-id')
+
+        const transcriptRow = document.getElementById(`transcript_${transmissionId}`)
+        const playBtnURL = document.getElementById(`play_${transmissionId}`)
+
+        if (currentAudioId === '1234-1234') {
+            audioPlayer.addEventListener('timeupdate', function () {
+                const currentTime = this.currentTime;
+                transcriptRow.querySelectorAll('span').forEach(span => {
+                    const start = parseFloat(span.dataset.start);
+                    const end = parseFloat(span.dataset.end);
+                    if (currentTime >= start && currentTime <= end) {
+                        span.classList.add('highlight');
+                    } else {
+                        span.classList.remove('highlight');
+                    }
+                });
+            });
+            audioPlayer.addEventListener('ended', function () {
+                transcriptRow.style.display = "none";
+                currentAudioId = '1234-1234';
+            });
+            currentAudioId = transmissionId
+            audioPlayer.src = playBtnURL.getAttribute('data-audio-url')
+            audioPlayer.play();
+
+
+        } else if (currentAudioId === transmissionId) {
+            audioPlayer.pause();
+            currentAudioId = '1234-1234';
+            audioPlayer.src = '';
+        }
+
+    }
+
+    function loadInitAudio() {
+        let data = {
+            "audio_type": "digital",
+            "audio_url": "https://mars.icarey.net/audio/chemung_archive/2024/3/13/300-1710308381_154875000.0-call_143.mp3",
+            "call_length": 17,
+            "duplex": 0,
+            "emergency": 0,
+            "encrypted": 0,
+            "freq": 154875000,
+            "freqList": [
+                {
+                    "error_count": "130",
+                    "freq": 154875000,
+                    "len": 8.1,
+                    "pos": 0.0,
+                    "spike_count": "12",
+                    "time": 1710308372
+                },
+                {
+                    "error_count": "0",
+                    "freq": 154875000,
+                    "len": 1.62,
+                    "pos": 8.1,
+                    "spike_count": "0",
+                    "time": 1710308381
+                },
+                {
+                    "error_count": "0",
+                    "freq": 154875000,
+                    "len": 6.3,
+                    "pos": 9.72,
+                    "spike_count": "0",
+                    "time": 1710308386
+                },
+                {
+                    "error_count": "90",
+                    "freq": 154875000,
+                    "len": 1.44,
+                    "pos": 16.02,
+                    "spike_count": "6",
+                    "time": 1710308394
+                }
+            ],
+            "mode": 0,
+            "priority": 0,
+            "short_name": "chemung-ny",
+            "srcList": [
+                {
+                    "emergency": 0,
+                    "pos": 0.0,
+                    "signal_system": "",
+                    "src": 101,
+                    "tag": "",
+                    "time": 1710308372
+                },
+                {
+                    "emergency": 0,
+                    "pos": 8.1,
+                    "signal_system": "",
+                    "src": 134,
+                    "tag": "",
+                    "time": 1710308381
+                },
+                {
+                    "emergency": 0,
+                    "pos": 9.72,
+                    "signal_system": "",
+                    "src": 14305045,
+                    "tag": "",
+                    "time": 1710308386
+                },
+                {
+                    "emergency": 0,
+                    "pos": 16.02,
+                    "signal_system": "",
+                    "src": 101,
+                    "tag": "",
+                    "time": 1710308394
+                }
+            ],
+            "start_time": 1710308372,
+            "stop_time": 1710308395,
+            "talkgroup": 300,
+            "talkgroup_description": "Chemung CW Police Dispatch",
+            "talkgroup_group": "Law",
+            "talkgroup_group_tag": "Law Dispatch",
+            "talkgroup_tag": "Chem Law Disp",
+            "transcript": {
+                "addresses": [],
+                "message": "Transcribe Success!",
+                "process_time_seconds": 1.01,
+                "segments": [
+                    {
+                        "end": 7.49,
+                        "segment_id": 1,
+                        "start": 1.21,
+                        "text": [
+                            {
+                                "end": 1.61,
+                                "start": 1.21,
+                                "word": " Received.",
+                                "word_id": 1
+                            },
+                            {
+                                "end": 1.85,
+                                "start": 1.63,
+                                "word": " I",
+                                "word_id": 2
+                            },
+                            {
+                                "end": 2.09,
+                                "start": 1.85,
+                                "word": " just",
+                                "word_id": 3
+                            },
+                            {
+                                "end": 2.57,
+                                "start": 2.09,
+                                "word": " got",
+                                "word_id": 4
+                            },
+                            {
+                                "end": 2.75,
+                                "start": 2.57,
+                                "word": " off",
+                                "word_id": 5
+                            },
+                            {
+                                "end": 2.87,
+                                "start": 2.75,
+                                "word": " the",
+                                "word_id": 6
+                            },
+                            {
+                                "end": 3.07,
+                                "start": 2.87,
+                                "word": " phone",
+                                "word_id": 7
+                            },
+                            {
+                                "end": 3.21,
+                                "start": 3.07,
+                                "word": " with",
+                                "word_id": 8
+                            },
+                            {
+                                "end": 3.45,
+                                "start": 3.21,
+                                "word": " them.",
+                                "word_id": 9
+                            },
+                            {
+                                "end": 3.73,
+                                "start": 3.51,
+                                "word": " They",
+                                "word_id": 10
+                            },
+                            {
+                                "end": 3.97,
+                                "start": 3.73,
+                                "word": " said",
+                                "word_id": 11
+                            },
+                            {
+                                "end": 4.17,
+                                "start": 3.97,
+                                "word": " that",
+                                "word_id": 12
+                            },
+                            {
+                                "end": 4.31,
+                                "start": 4.17,
+                                "word": " they'll",
+                                "word_id": 13
+                            },
+                            {
+                                "end": 4.45,
+                                "start": 4.31,
+                                "word": " have",
+                                "word_id": 14
+                            },
+                            {
+                                "end": 4.77,
+                                "start": 4.45,
+                                "word": " someone",
+                                "word_id": 15
+                            },
+                            {
+                                "end": 4.95,
+                                "start": 4.77,
+                                "word": " in",
+                                "word_id": 16
+                            },
+                            {
+                                "end": 5.15,
+                                "start": 4.95,
+                                "word": " route,",
+                                "word_id": 17
+                            },
+                            {
+                                "end": 5.53,
+                                "start": 5.29,
+                                "word": " but",
+                                "word_id": 18
+                            },
+                            {
+                                "end": 5.67,
+                                "start": 5.53,
+                                "word": " I'll",
+                                "word_id": 19
+                            },
+                            {
+                                "end": 5.83,
+                                "start": 5.67,
+                                "word": " let",
+                                "word_id": 20
+                            },
+                            {
+                                "end": 5.97,
+                                "start": 5.83,
+                                "word": " them",
+                                "word_id": 21
+                            },
+                            {
+                                "end": 6.19,
+                                "start": 5.97,
+                                "word": " know",
+                                "word_id": 22
+                            },
+                            {
+                                "end": 6.45,
+                                "start": 6.19,
+                                "word": " that",
+                                "word_id": 23
+                            },
+                            {
+                                "end": 6.61,
+                                "start": 6.45,
+                                "word": " we",
+                                "word_id": 24
+                            },
+                            {
+                                "end": 6.77,
+                                "start": 6.61,
+                                "word": " might",
+                                "word_id": 25
+                            },
+                            {
+                                "end": 6.89,
+                                "start": 6.77,
+                                "word": " need",
+                                "word_id": 26
+                            },
+                            {
+                                "end": 7.11,
+                                "start": 6.89,
+                                "word": " two",
+                                "word_id": 27
+                            },
+                            {
+                                "end": 7.49,
+                                "start": 7.11,
+                                "word": " wreckers.",
+                                "word_id": 28
+                            }
+                        ]
+                    },
+                    {
+                        "end": 9.27,
+                        "segment_id": 2,
+                        "start": 8.59,
+                        "text": [
+                            {
+                                "end": 8.99,
+                                "start": 8.59,
+                                "word": " Received.",
+                                "word_id": 1
+                            },
+                            {
+                                "end": 9.13,
+                                "start": 8.99,
+                                "word": " Thank",
+                                "word_id": 2
+                            },
+                            {
+                                "end": 9.27,
+                                "start": 9.13,
+                                "word": " you.",
+                                "word_id": 3
+                            }
+                        ]
+                    },
+                    {
+                        "end": 15.57,
+                        "segment_id": 3,
+                        "start": 10.45,
+                        "text": [
+                            {
+                                "end": 10.85,
+                                "start": 10.45,
+                                "word": " 3",
+                                "word_id": 1
+                            },
+                            {
+                                "end": 10.97,
+                                "start": 10.85,
+                                "word": "-3",
+                                "word_id": 2
+                            },
+                            {
+                                "end": 11.07,
+                                "start": 10.97,
+                                "word": "-4",
+                                "word_id": 3
+                            },
+                            {
+                                "end": 11.37,
+                                "start": 11.07,
+                                "word": "-5,",
+                                "word_id": 4
+                            },
+                            {
+                                "end": 11.65,
+                                "start": 11.47,
+                                "word": " Com",
+                                "word_id": 5
+                            },
+                            {
+                                "end": 11.89,
+                                "start": 11.65,
+                                "word": " Center.",
+                                "word_id": 6
+                            },
+                            {
+                                "end": 12.15,
+                                "start": 11.97,
+                                "word": " We're",
+                                "word_id": 7
+                            },
+                            {
+                                "end": 12.23,
+                                "start": 12.15,
+                                "word": " out",
+                                "word_id": 8
+                            },
+                            {
+                                "end": 12.35,
+                                "start": 12.23,
+                                "word": " at",
+                                "word_id": 9
+                            },
+                            {
+                                "end": 12.89,
+                                "start": 12.35,
+                                "word": " CCJ.",
+                                "word_id": 10
+                            },
+                            {
+                                "end": 13.57,
+                                "start": 13.17,
+                                "word": " Sending",
+                                "word_id": 11
+                            },
+                            {
+                                "end": 14.01,
+                                "start": 13.57,
+                                "word": " 1",
+                                "word_id": 12
+                            },
+                            {
+                                "end": 14.45,
+                                "start": 14.01,
+                                "word": "-0",
+                                "word_id": 13
+                            },
+                            {
+                                "end": 14.75,
+                                "start": 14.45,
+                                "word": "-0",
+                                "word_id": 14
+                            },
+                            {
+                                "end": 14.97,
+                                "start": 14.75,
+                                "word": "-5",
+                                "word_id": 15
+                            },
+                            {
+                                "end": 15.33,
+                                "start": 14.97,
+                                "word": "-4",
+                                "word_id": 16
+                            },
+                            {
+                                "end": 15.57,
+                                "start": 15.33,
+                                "word": "-7.",
+                                "word_id": 17
+                            }
+                        ]
+                    },
+                    {
+                        "end": 16.83,
+                        "segment_id": 4,
+                        "start": 16.43,
+                        "text": [
+                            {
+                                "end": 16.83,
+                                "start": 16.43,
+                                "word": " Received.",
+                                "word_id": 1
+                            }
+                        ]
+                    }
+                ],
+                "status": "ok",
+                "transcription": "Received. I just got off the phone with them. They said that they'll have someone in route, but I'll let them know that we might need two wreckers. Received. Thank you. 3-3-4-5, Com Center. We're out at CCJ. Sending 1-0-0-5-4-7. Received."
+            }
+        }
+        const audioList = document.getElementById('audioList');
+        const listItem = document.createElement('div');
+        listItem.className = 'list-group-item';
+
+        // Assuming data has: id, audioSrc, transcript (which is an array of {start, end, word})
+        listItem.innerHTML = `
+            <h5 class="mb-3">System: ${data.short_name} Talkgroup: ${data.talkgroup_tag}</h5>
+            <audio controls id="audio-${data.id}">
+                <source src="${data.audio_url}" type="audio/mp3">
+                Your browser does not support the audio element.
+            </audio>
+            <div id="transcript-${data.id}" class="mt-3"></div>
+        `;
+        audioList.appendChild(listItem);
+
+        const transcriptDiv = document.getElementById(`transcript-${data.id}`);
+        data.transcript.segments.forEach(segment => {
+            segment.text.forEach(wordInfo => {
+                const span = document.createElement('span');
+                span.dataset.start = wordInfo.start;
+                span.dataset.end = wordInfo.end;
+                span.textContent = wordInfo.word + ' ';
+                transcriptDiv.appendChild(span);
+            })
+
+        });
+
+        const audioPlayer = document.getElementById(`audio-${data.id}`);
+        audioPlayer.addEventListener('timeupdate', function () {
+            const currentTime = this.currentTime;
+            transcriptDiv.querySelectorAll('span').forEach(span => {
+                const start = parseFloat(span.dataset.start);
+                const end = parseFloat(span.dataset.end);
+                if (currentTime >= start && currentTime < end) {
+                    span.classList.add('highlight');
+                } else {
+                    span.classList.remove('highlight');
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        socket.on('new_audio', function (data) {
+            console.log(data)
+            const audioTable = document.getElementById('call_table');
+
+            // Limit for the number of items to keep
+            const maxItems = 50; // For example, keep only the latest 50 items
+
+            // Remove the oldest item if the limit is exceeded
+            if (audioTable.children.length >= maxItems) {
+                audioTable.removeChild(audioTable.lastChild);
+                audioTable.removeChild(audioTable.lastChild);
+            }
+
+            // create new tr element for transmission data
+            const tableAudioRow = document.createElement('tr');
+            tableAudioRow.id = 'transmission_' + data.id
+            tableAudioRow.className = 'clickable-row';
+
+            //setup event listener for click on tr element
+            tableAudioRow.addEventListener('click', () => {
+                const drawer = document.getElementById('transcript_' + data.id);
+                if (drawer.style.display === "none") {
+                    drawer.style.display = "table-row";
+                } else {
+                    drawer.style.display = "none";
+                }
+                const audioPlayer = document.getElementById('audioPlayer')
+                audioPlayer.setAttribute('data-transmission-id', data.id)
+
+                playAudio()
+
+            });
+
+            // create new hidden tr element for transmission transcript data
+            const tableTranscriptRow = document.createElement('tr');
+            tableTranscriptRow.id = 'transcript_' + data.id
+            tableTranscriptRow.className = 'drawer text-start ms-2';
+            tableTranscriptRow.style.display = 'none';
+
+
+            // Populate transmission data tr element with table data
+            tableAudioRow.innerHTML = `
+             <th id="play_${data.id}" data-audio-url="${data.audio_url}"><i class="fa fa-play"></i></th>
+                    <td>${data.short_name}</td>
+                    <td>${data.talkgroup_tag}</td>
+                    <td>${formatEpochToDate(data.start_time)}</td>`;
+
+            //create th item for transcript tr
+            const transcriptTableHead = document.createElement('th');
+
+            const transcriptTableData = document.createElement('td');
+            transcriptTableData.colSpan = 3;
+
+            data.transcript.segments.forEach(segment => {
+                // Create a new div for each segment
+                const segmentDiv = document.createElement('div');
+                segmentDiv.innerHTML = `<strong><span>${segment.unit_tag}</span></strong> - `
+                segment.words.forEach(wordInfo => {
+                    const span = document.createElement('span');
+                    span.dataset.start = wordInfo.start;
+                    span.dataset.end = wordInfo.end;
+                    span.textContent = wordInfo.word + ' ';
+                    // Append the span to the segmentDiv instead of the transcriptDiv
+                    segmentDiv.appendChild(span);
+                });
+                // Append the segmentDiv to the transcriptDiv
+                transcriptTableData.appendChild(segmentDiv);
+            });
+
+            //append transcript th to the row
+            tableTranscriptRow.appendChild(transcriptTableHead);
+
+            //append transcript td to the row.
+            tableTranscriptRow.appendChild(transcriptTableData);
+
+            // Prepend the transcription tr to the list
+            audioTable.prepend(tableTranscriptRow);
+
+            // Prepend the transmission data tr to the list
+            audioTable.prepend(tableAudioRow);
+        });
+    });
+</script>
+</body>
+</html>

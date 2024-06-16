@@ -1,0 +1,32 @@
+.archive {
+    background-color: #bebeae;
+    color: #1f1f1f;
+    font-size: 14px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border: 3px solid #2d2d2d;
+    border-radius: 20px;
+    box-shadow: 3px 3px 5px #2d2d2d;
+}
+
+.table-responsive {
+    overflow-y: auto; /* Enables vertical scrolling */
+}
+
+
+.archive_navigation {
+    font-size: 28px;
+}
+
+.archive_navigation:hover {
+    color: #e0e0e0;
+}
+
+.archive .table {
+    font-size: 12px;
+    --bs-table-color: #2d2d2d;
+    --bs-table-bg: #bebeae;
+    text-align: center;
+}

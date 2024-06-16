@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Player with Captions</title>
+<style>
+  #captions {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+  }
+</style>
+</head>
+<body>
+
+<audio id="audioPlayer" controls>
+  <source src="static/audio/300-1712166366_154875000.0-call_3171.wav" type="audio/mp3">
+  Your browser does not support the audio element.
+</audio>
+
+<div id="captions">Captions will appear here...</div>
+<div id="sourceInfo">Source will appear here...</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const captions = [
+    { start: 0.05, end: 1.51, text: "3-E-4-7 Comm Center." },
+    { start: 2.96, end: 3.52, text: "4-7" },
+    { start: 4.85, end: 7.29, text: "Are we aware of how far they are from the county line?" },
+    { start: 8.89, end: 9.81, text: "That's negative." },
+    { start: 10.15, end: 13.15, text: "Steuben advised was coming eastbound, turned around and went westbound," },
+    { start: 13.49, end: 17.69, text: "and came around and went eastbound again, so they don't have an exact location on this." },
+    { start: 18.93, end: 21.85, text: "Not sure if its entered Chemung County or not." },
+    { start: 22.53, end: 23.95, text: "More or less informational." },
+    { start: 24.89, end: 25.37, text: "Received." }
+  ];
+
+  const srcList = [
+    { pos: 0.0, src: 14305047 },
+    { pos: 1.62, src: 103 },
+    { pos: 4.5, src: 14305047 },
+    { pos: 7.56, src: 103 },
+    { pos: 18.54, src: 103 },
+    { pos: 24.66, src: 14305047 }
+  ];
+
+  const audioPlayer = document.getElementById('audioPlayer');
+  const captionDiv = document.getElementById('captions');
+  const sourceInfoDiv = document.getElementById('sourceInfo');
+
+  audioPlayer.addEventListener('timeupdate', function() {
+    const currentTime = audioPlayer.currentTime;
+    captionDiv.innerHTML = ''; // Clear current caption
+    captions.forEach(function(caption) {
+      if (currentTime >= caption.start && currentTime <= caption.end) {
+        captionDiv.innerHTML = caption.text;
+      }
+    });
+
+    // Determine and display the current source based on the playback time
+    for (let i = 0; i < srcList.length; i++) {
+      if (currentTime >= srcList[i].pos && (i + 1 === srcList.length || currentTime < srcList[i + 1].pos)) {
+        sourceInfoDiv.innerHTML = 'Source: ' + srcList[i].src;
+        break;
+      }
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+html, body {
+    box-sizing: content-box;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.audio_player {
+    display: none;
+}
+
+.scanner_display {
+    font-family: 'Roboto Mono', monospace;
+    background-color: #bebeae;
+    color: #0f1017;
+    width: 100%;
+    height: 100%;
+    margin: 0 auto; /* Center the container */
+    overflow: auto; /* Adds scrollbars if content overflows */
+    border: 1px solid #343434; /* Optional border for visibility */
+    font-size: 60px;
+    padding: 15px 10px;
+
+}
+
+.scanner_display > * {
+    box-sizing: border-box; /* Ensures padding and border are inside the element */
+    margin: 0; /* Removes default margins */
+    padding: 0; /* Removes default padding */
+}
+
+#notification_div {
+    padding: 2px;
+}
+
+.small_tags {
+    display: inline-block; /* Ensures inline but block-like behavior */
+    min-width: 60px; /* Set minimum width to handle up to 4 digits */
+    margin-right: 15px; /* Adds space between the spans */
+}
+
+.medium_tags {
+    font-size: 16px;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+}
+
+.large_tags {
+    font-size: 80px;
+    font-weight: 900;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.progress-bar {
+    position: absolute;
+    display: none;
+    bottom: 0; /* Align to the bottom */
+    left: 0;
+    padding: 0px;
+    min-width: 0px;
+    height: 80px; /* Height of the progress bar */
+    background-color: #656565; /* Color of the progress bar */
+    border-radius: 0px 5px 5px 0px;
+    transition: width 0.5s ease; /* Smooth transition for width changes */
+    z-index: 1;
+}
+
+.time-left {
+    position: absolute;
+    right: 0; /* Adjust as needed */
+    z-index: 2;
+    color: #1f1f1f; /* Choose a color that contrasts with your progress bar */
+    font-size: 50px; /* Adjust as needed */
+    bottom: .01%;
+}
+
+.scanner_display_active_call {
+    background-color: #6ceaff;
+    box-shadow: 0px 0px 12px 2px #29e1ff;
+}
+
+.scanner_display_inactive_call {
+    background-color: #bebeae;
+}
+
+.scanner_notification_active_call_tones {
+    --fa-primary-color: #ffffff;
+    --fa-secondary-color: #cb1d24;
+    --fa-secondary-opacity: 1;
+    text-shadow: #cb1d24 1px 0 10px;
+}
+
+.scanner_notification_inactive_call_tones {
+    --fa-primary-color: #7c7b7b;
+    --fa-secondary-color: #505050;
+    --fa-secondary-opacity: 0.8;
+}

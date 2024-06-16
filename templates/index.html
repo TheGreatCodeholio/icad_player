@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h6 class="text-center d-none">{% block title %}  Home{% endblock %}</h6>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+
+            </div>
+        </div>
+        <div class="container">
+            <div id="archive" class="row d-none">
+                <!-- Left buffer (hidden on xs) -->
+                <div class="col-md-3 d-none d-md-block">
+                </div>
+                <!-- Archive content -->
+                <div class="col-12 col-md-6">
+                    <button id="archive_close" type="button" class="btn-close btn-close-white"
+                            aria-label="Close"></button>
+
+                    <div id="archive_display" class="archive_display">
+                        <div class="table-responsive archive">
+                            <table class="table">
+                                <thead class="audio_list_header">
+                                <tr>
+                                    <th scope="col"><i class="fa fa-play d-none"></i></th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">County</th>
+                                    <th scope="col">Talkgroup</th>
+                                    <th scope="col">Name</th>
+                                </tr>
+                                </thead>
+                                <tbody id="transmission_list">
+                                <tr class="archive_line">
+                                    <td>
+                                        <i class="playButton fa-solid fa-play"
+                                           data-src="${transmission.audio_path}"></i>
+                                    </td>
+                                    <td>12/17</td>
+                                    <td>1:46:11</td>
+                                    <td>Philadelphia</td>
+                                    <td>PPD S-West</td>
+                                    <td>South-West Division (12th. and 18th. Districts)</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                    <div id="filters">
+                        <select id="county_select" class="form-select">
+                            <option value="">Select County</option>
+                            <!-- County options will be populated here -->
+                        </select>
+                        <select id="group_select" class="form-select">
+                            <option value="">Select Group</option>
+                            <!-- Group options will be populated here -->
+                        </select>
+                        <select id="service_type_select" class="form-select">
+                            <option value="">Select Service Type</option>
+                            <!-- Service Type options will be populated here -->
+                        </select>
+                        <select id="talkgroup_decimal_select" class="form-select">
+                            <option value="">Select Talkgroup Decimal</option>
+                            <!-- Talkgroup Decimal options will be populated here -->
+                        </select>
+                        <input type="datetime-local" id="start_date" class="form-control">
+                        <input type="datetime-local" id="end_date" class="form-control">
+                        <select id="items_per_page_select" class="form-select">
+                            <option value="10">10 per page</option>
+                            <option value="20">20 per page</option>
+                            <option value="50">50 per page</option>
+                            <option value="100">100 per page</option>
+                        </select>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-2">
+                            <div style="text-align: left" class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       id="download_toggle"/>
+                                <label class="form-check-label" for="download_toggle"><i
+                                        class="fa fa-download"></i></label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-end" id="pagination_text"></p>
+                        </div>
+                        <div class="col-4">
+                            <i id="beginning" class="fa fa-angle-double-left archive_navigation"></i>
+                            <i id="previous" class="fa fa-angle-left archive_navigation"></i>
+                            <span id="current_page"></span>
+                            <i id="next" class="fa fa-angle-right archive_navigation"></i>
+                            <i id="end" class="fa fa-angle-double-right archive_navigation"></i>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Right buffer (hidden on xs) -->
+                <div class="col-md-3 d-none d-md-block">
+                </div>
+            </div>
+            <div id="scanner" class="row">
+                <!-- Scanner content -->
+                <div class="" style=""></div>
+                <div class="col-sm-12 col-md-10 col-lg-6 col-xl-6 col-xxl-6 offset-md-1 offset-lg-3 offset-xl-3 offset-xxl-3 font-monospace text-nowrap align-self-center">
+                    <div>
+                        <div id="notification_div" class="row mb-n3">
+                            <div class="col-4">
+                                <h6>Player</h6>
+                            </div>
+                            <div class="col-4">
+                            </div>
+                            <div class="col-4 text-end">
+                                <i id="tones_light" class="text-start fa-duotone fa-triangle-exclamation fa-xl scanner_notification_inactive_call_tones"></i>
+                                <i id="notification_light"
+                                   class="text-end fa-solid fa-rectangle-wide fa-xl scanner_notification_inactive_call"></i>
+                            </div>
+                        </div>
+                        <div id="scanner_display" class="scanner scanner_display_inactive_call pulse animated">
+                            <div id="sys_time" class="row mb-2">
+                                <div class="col-3 text-start">
+                                    <p id="24_hr_clock" class="medium_tags"></p>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <p id="listener_count" class="small_tags"><span><i
+                                            class="fa-solid fa-user"></i>: </span></p>
+                                </div>
+                                <div class="col-3 text-end">
+                                    <p id="queue_count" class="small_tags"><span><i
+                                            class="fa-sharp fa-solid fa-walkie-talkie"></i>: </span>0</p>
+                                </div>
+                            </div>
+                            <div id="sys_info_1" class="row mb-0">
+                                <div class="col-3 text-start">
+                                    <span id="system_name" class="small_tags">System</span>
+                                </div>
+                                <div class="col-3">
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span id="tg_group" class="me-1 small_tags text-wrap">Group</span>
+                                </div>
+                            </div>
+                            <div id="sys_info_2" class="row mb-1 mt-0">
+                                <div class="col-3 text-start">
+                                    <span id="tg_alpha" class="small_tags">Talkgroup</span>
+                                </div>
+                                <div class="col-3">
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span id="call_start_time" class="small_tags">00:00</span>
+                                </div>
+                            </div>
+                            <div id="sys_info_3" class="row mb-1">
+                                <div class="col-12 text-start">
+                                    <span id="tg_name" class="large_tags">Player</span>
+                                </div>
+                            </div>
+                            <div id="sys_info_4" class="row mb-0">
+                                <div class="col-3 text-start">
+                                    <span id="tg_county" class="small_tags">County</span>
+                                </div>
+                                <div class="col-3">
+                                </div>
+                                <div class="col-6 text-end">
+                                    <p id="tg_service_type" class="small_tags text-wrap">
+                                        <span>Service Type</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div id="sys_info_5" class="row mb-0">
+                                <div class="col-3 text-start">
+                                    <span id="detected_tones" class="small_tags">
+                                    </span>
+                                </div>
+                                <div class="col-6 text-center">
+                                </div>
+                                <div class="col-3 text-end">
+                                </div>
+                            </div>
+                            <div id="sys_info_6" class="row mb-0">
+                                <div class="col-6 text-start">
+                                    <span id="channel_frequency" class="small_tags">
+                                        F: 000.0000 MHz
+                                    </span>
+                                </div>
+                                <div class="col-3 text-center">
+                                </div>
+                                <div class="col-3 text-end">
+                                    <span id="tg_id" class="small_tags text-wrap">TGID: 0</span>
+                                </div>
+                            </div>
+                            <div id="sys_info_7" class="row mt-0 mb-0">
+                                <div class="col-4 text-start">
+                                    <div class="d-flex justify-content-start">
+                                        <span id="errors_count" class="small_tags">E: 0 &nbsp</span>
+                                        <span id="spike_count" class="small_tags">S: 0</span>
+                                    </div>
+                                </div>
+                                <div class="col-2 text-center">
+
+                                </div>
+                                <div class="col-6 text-end">
+                                    <span id="unit_id" class="small_tags text-wrap">UID: 0</span>
+                                </div>
+                            </div>
+                            <div id="audio_list_header" class="row mb-0 mt-4">
+                                <div class="col-3">
+                                    <p class="text-center ms-1 audio_list_header">Time</p>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center audio_list_header">Talkgroup</p>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center audio_list_header">Group</p>
+                                </div>
+                                <div class="col-3">
+                                    <p class="text-center audio_list_header">Type</p>
+                                </div>
+                                <hr style="color: #2d2d2d; margin-bottom: 1px; margin-top: 0;">
+                            </div>
+
+                            <div id="last_played">
+
+                            </div>
+                            <div class="row mt-2 mb-2">
+                                <span class="text-start time-left">0:00</span>
+                                <div class="progress-bar">
+                                </div>
+                            </div>
+                            <div id="transcriptContainer" class="transcript p-3 row mt-2 mb-3">
+                                <div class="col">
+                                    <span id="segment_transcript">...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="filter_labels" class="row mt-2 mb-3">
+                            <div class="col">
+                                <div id="filter_labels_container"></div>
+                            </div>
+                        </div>
+                        <div id="avoided_talkgroups" class="row mt-2 mb-3">
+                            <div class="col">
+                                <div id="avoided_talkgroups_container"></div>
+                            </div>
+                        </div>
+                        <div id="scanner_buttons" class="scanner_buttons">
+                            <div class="row mb-3">
+                                <div class="col-4">
+                                    <button id="scanButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        <i id="scanButton_indicator"
+                                           class="fas fa-circle scanner-indicator_disabled"></i>
+                                        Live
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="transcriptButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        <i id="transcriptButton_indicator"
+                                           class="fas fa-circle scanner-indicator_disabled"></i>
+                                        Transcript
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="holdTgButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        <i id="holdTgButton_indicator" class="fas fa-circle scanner-indicator_disabled"></i>
+
+
+                                        <span id="hold-text">Hold Talkgroup</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-4">
+                                    <button id="replayLastButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        Replay Last
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="skipNextButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        Skip Next
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="avoidButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        Avoid
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-4">
+                                    <button id="archiveButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        Archive
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="pauseButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button">
+                                        <i id="pauseButton_indicator"
+                                           class="fas fa-circle scanner-indicator_disabled"></i>
+                                        <span id="pause-text">Pause</span>
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="filterButton" type="button"
+                                            class="btn btn-secondary btn-lg scanner-button"
+                                            data-bs-toggle="modal" data-bs-target="#channelFilter">
+                                        Channel Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Right buffer (hidden on xs) -->
+                <div class="col-md-3 d-none d-md-block">
+                    <!-- Buffer content goes here -->
+                </div>
+            </div>
+        </div>
+        <audio id="audio-player" class="audio_player" controls>
+            <source src="" type="audio/mp3">
+        </audio>
+
+        <audio id="audio-player-beep" class="audio_player" controls>
+            <source src="" type="audio/mp3">
+        </audio>
+
+        <audio id="archive-player" class="audio_player" controls>
+            <source src="" type="audio/mp3">
+        </audio>
+
+    </div>
+    <div class="modal fade" id="channelFilter" tabindex="-1"
+         aria-labelledby="channelFilterLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="channelFilterLabel">Channel Filters</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="channel_filter" class="row mb-3">
+                        <div class="accordion" id="filterAccordian">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="collapseHeading">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#scanlistCollapse" aria-expanded="true"
+                                            aria-controls="scanlistCollapse">
+                                        Scanlist Selection
+                                    </button>
+                                </h2>
+                                <div id="scanlistCollapse" class="accordion-collapse collapse"
+                                     aria-labelledby="collapseHeading" data-bs-parent="#filterAccordian">
+                                    <div id="scanlistsFilter" class="accordion-body filter_buttons">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingCounty">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapseCounty" aria-expanded="false"
+                                            aria-controls="collapseCounty">
+                                        County Selection
+                                    </button>
+                                </h2>
+                                <div id="collapseCounty" class="accordion-collapse collapse"
+                                     aria-labelledby="headingCounty"
+                                     data-bs-parent="#filterAccordian">
+                                    <div id="countyFilter" class="accordion-body filter_buttons">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingFips">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapseFips" aria-expanded="false"
+                                            aria-controls="collapseFips">
+                                        FIPS Selection
+                                    </button>
+                                </h2>
+                                <div id="collapseFips" class="accordion-collapse collapse"
+                                     aria-labelledby="headingFips" data-bs-parent="#filterAccordian">
+                                    <div id="fipsFilter" class="accordion-body filter_buttons">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="groupHeading">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapseGroup" aria-expanded="false"
+                                            aria-controls="collapseGroup">
+                                        Group Selection
+                                    </button>
+                                </h2>
+                                <div id="collapseGroup" class="accordion-collapse collapse"
+                                     aria-labelledby="groupHeading" data-bs-parent="#filterAccordian">
+                                    <div id="groupFilter" class="accordion-body filter_buttons">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="servicetypeHeading">
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#servicetypeCollapse" aria-expanded="false"
+                                            aria-controls="servicetypeCollapse">
+                                        Service Type Selection
+                                    </button>
+                                </h2>
+                                <div id="servicetypeCollapse" class="accordion-collapse collapse"
+                                     aria-labelledby="servicetypeHeading" data-bs-parent="#filterAccordian">
+                                    <div id="service_typeFilter" class="accordion-body filter_buttons">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import {Scanner} from '{{ url_for('static', filename='js/live_scanner/scanner.js') }}'; // Adjust the import path as necessary
+        const scanner = new Scanner();
+    </script>
+    <script src="{{ url_for('static', filename='js/archive.js') }}"></script>
+{% endblock %}

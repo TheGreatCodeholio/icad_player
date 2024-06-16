@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Transcript Highlighter</title>
+<link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div id="transcript"></div>
+<audio id="audioPlayer" controls>
+    <source src="{{ url_for('static', filename='audio/wyalusing_20240123_173313.mp3') }}" type="audio/mp3">
+    Your browser does not support the audio element.
+</audio>
+
+<script src="{{ url_for('static', filename='js/test_highlighter.js') }}"></script>
+</body>
+</html>

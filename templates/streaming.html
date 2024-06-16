@@ -1,0 +1,166 @@
+{% extends 'base_streaming.html' %}
+{% block content %}
+
+    <div id="scanner_display" class="scanner_display">
+        <div id="notification_row" class="row mb-4">
+            <div class="col-4">
+                <span id="12_hr_clock" class="small_tags">00:00 PM</span>
+            </div>
+            <div class="col-4 text-center">
+                <i id="tones_light"
+                   class="fa-duotone fa-triangle-exclamation scanner_notification_inactive_call_tones"></i>
+            </div>
+            <div class="col-4 text-end">
+                <span id="listener_count" class="small_tags"><i class="fa-solid fa-user"></i>: 9999</span>
+                <span id="queue_count" class="small_tags"><i
+                        class="fa-solid fa-walkie-talkie"></i>: 9999</span>
+            </div>
+        </div>
+        <div id="sys_info_1" class="row mb-3">
+            <div class="col-3 text-start">
+                <span id="system_name" class="small_tags">chemung-ny</span>
+            </div>
+            <div class="col-3">
+            </div>
+            <div class="col-6 text-end">
+                <span id="tg_group" class="me-1 small_tags text-wrap">Law</span>
+            </div>
+        </div>
+        <div id="sys_info_2" class="row mb-4">
+            <div class="col-5 text-start">
+            </div>
+            <div class="col-2 text-center">
+            </div>
+            <div class="col-5 text-end">
+            </div>
+        </div>
+        <div id="sys_info_3" class="row mb-4">
+            <div class="col-6 text-start">
+                <span id="tg_alpha" class="small_tags">Chem Law Disp</span>
+            </div>
+            <div class="col-6 text-end">
+                <span id="call_start_time" class="small_tags">09:23 PM</span>
+            </div>
+        </div>
+        <div id="sys_info_4" class="row mb-4">
+            <div class="col-12 text-start">
+                <span id="tg_name" class="large_tags">Chemung CW Police Dispatch</span>
+            </div>
+        </div>
+        <div id="sys_info_5" class="row mb-4">
+            <div class="col-6 text-start">
+                <span id="tg_county" class="small_tags">County</span>
+            </div>
+            <div class="col-6 text-end">
+                <p id="tg_service_type" class="small_tags text-wrap">
+                    <span>Law Dispatch</span>
+                </p>
+            </div>
+        </div>
+        <div id="sys_info_6" class="row mb-4">
+            <div class="col-5 text-start">
+            </div>
+            <div class="col-2 text-center">
+            </div>
+            <div class="col-5 text-end">
+            </div>
+        </div>
+        <div id="sys_info_7" class="row mb-4">
+            <div class="col-6 text-start">
+                                    <span id="channel_frequency" class="small_tags">
+                                        F: 154.8750 MHz
+                                    </span>
+            </div>
+            <div class="col-6 text-end">
+                <span id="tg_id" class="small_tags text-wrap">TGID: 300</span>
+            </div>
+        </div>
+        <div id="sys_info_8" class="row mb-0">
+            <div class="col-6 text-start">
+                <div class="d-flex justify-content-start">
+                    <span id="errors_count" class="small_tags">E: 0 &nbsp</span>
+                    <span id="spike_count" class="small_tags">S: 0</span>
+                </div>
+            </div>
+            <div class="col-6 text-end">
+                <span id="unit_id" class="small_tags text-wrap">UID: 0</span>
+            </div>
+        </div>
+        <div class="row mt-2 mb-2">
+            <span class="text-start time-left">0:00</span>
+            <div class="col-12 progress-bar">
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-player" class="audio_player" controls>
+        <source src="" type="audio/mp3">
+    </audio>
+    <script>
+        function adjustBootstrapSpacingClasses(height, width) {
+
+            const defaultHeight = 1080; // Default screen height
+            const scaleFactor = height / defaultHeight;
+
+            // Define a function to calculate the new class index
+            function getNewClassIndex(originalIndex) {
+                return Math.max(0, Math.round(originalIndex * scaleFactor));
+            }
+
+            // Select all elements that might have margin or padding classes
+            const elements = document.querySelectorAll('[class*="mb-"], [class*="mt-"], [class*="pb-"], [class*="pt-"]');
+            elements.forEach(el => {
+                el.className.split(' ').forEach(cls => {
+                    if (cls.match(/^(mb|mt|pb|pt)-\d+$/)) {
+                        const [baseClass, originalIndex] = cls.split('-');
+                        const newClassIndex = getNewClassIndex(parseInt(originalIndex, 10));
+                        // Remove the original class and add the new class
+                        el.classList.remove(cls);
+                        el.classList.add(`${baseClass}-${newClassIndex}`);
+                    }
+                });
+            });
+        }
+
+        function adjustUI(width, height) {
+            const scaleFactor = Math.sqrt(width * height / (1920 * 1080));
+
+            // Set the size of the scanner display based on the query parameters
+            const scanner_display = document.getElementById('scanner_display');
+            scanner_display.style.fontSize = `${60 * scaleFactor}px`;
+            scanner_display.style.padding = `${15 * scaleFactor}px ${10 * scaleFactor}px`;
+
+            document.querySelectorAll('.medium_tags').forEach(el => {
+                el.style.fontSize = `${16 * scaleFactor}px`;
+            });
+
+            document.querySelectorAll('.large_tags').forEach(el => {
+                el.style.fontSize = `${80 * scaleFactor}px`;
+            });
+
+            document.querySelectorAll('.progress-bar').forEach(el => {
+                el.style.height = `${80 * scaleFactor}px`;
+            });
+
+            document.querySelectorAll('.time-left').forEach(el => {
+                el.style.fontSize = `${50 * scaleFactor}px`;
+            });
+
+            adjustBootstrapSpacingClasses(height, width)
+
+        }
+
+        function resizeBasedOnQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const width = parseInt(params.get('width')) || 1920;
+            const height = parseInt(params.get('height')) || 1080;
+            adjustUI(width, height);
+        }
+
+        window.onload = resizeBasedOnQueryParams;
+    </script>
+    <script type="module">
+        import {Scanner} from '{{ url_for('static', filename='js/stream_scanner/stream_scanner.js') }}'; // Adjust the import path as necessary
+        const scanner = new Scanner();
+    </script>
+{% endblock %}
